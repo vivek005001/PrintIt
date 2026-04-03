@@ -68,7 +68,7 @@ export default function MyOrders() {
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.06 }}
-                    className="card"
+                    className="card order-card-row"
                     style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}
                   >
                     <div style={{ flex: 1, minWidth: 160 }}>

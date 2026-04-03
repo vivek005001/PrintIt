@@ -52,7 +52,7 @@ export default function Cart() {
             <p style={{ color: 'var(--text-muted)' }}>{items.length} item{items.length !== 1 ? 's' : ''} ready to order</p>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 28, alignItems: 'start' }}>
+          <div className="cart-layout" style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: 28, alignItems: 'start' }}>
             {/* Items list */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               <AnimatePresence>
@@ -88,7 +88,7 @@ export default function Cart() {
             </div>
 
             {/* Summary */}
-            <div className="card" style={{ position: 'sticky', top: 90 }}>
+            <div className="card cart-summary" style={{ position: 'sticky', top: 80 }}>
               <h3 style={{ marginBottom: 20, fontSize: '1.1rem' }}>Order Summary</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
                 {items.map(i => (
