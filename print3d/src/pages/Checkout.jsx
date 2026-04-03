@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import AnimatedPage from '../components/AnimatedPage'
 import api from '../utils/api'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 const STATUS_STEPS = [
   { key: 'pending', label: 'Order Placed', icon: '📦', desc: 'Awaiting admin review' },
@@ -26,16 +27,11 @@ export default function Checkout() {
   const [uploadSuccess, setUploadSuccess] = useState(false)
   const fileRef = useRef()
 
-  useEffect(() => {
-    api.get(`/orders/${orderId}`)
-      .then(r => setOrder(r.data))
-      .finally(() => setLoading(false))
-    // Poll every 30s for status updates
-    const t = setInterval(() => {
-      api.get(`/orders/${orderId}`).then(r => setOrder(r.data)).catch(() => {})
-    }, 30000)
-    return () => clearInterval(t)
+  const fetchOrder = useCallback(() => {
+    api.get(`/orders/${orderId}`).then(r => setOrder(r.data)).finally(() => setLoading(false))
   }, [orderId])
+
+  useAutoRefresh(fetchOrder, 10000)
 
   const uploadReceipt = async (e) => {
     const file = e.target.files[0]

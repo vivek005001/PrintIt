@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import AnimatedPage from '../components/AnimatedPage'
 import api from '../utils/api'
+import { useAutoRefresh } from '../hooks/useAutoRefresh'
 
 const STATUS_LABELS = {
   pending: { label: 'Pending Approval', color: 'var(--status-pending)', icon: '⏳' },
@@ -18,12 +19,14 @@ export default function MyOrders() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
 
-  useEffect(() => {
+  const fetchOrders = useCallback(() => {
     api.get('/orders')
       .then(r => setOrders(r.data))
       .catch(() => setOrders([]))
       .finally(() => setLoading(false))
   }, [])
+
+  useAutoRefresh(fetchOrders, 10000)
 
   const filtered = filter === 'all' ? orders : orders.filter(o => o.status === filter)
 
@@ -32,8 +35,16 @@ export default function MyOrders() {
       <div className="page">
         <div className="container page-inner">
           <div className="page-header">
-            <h1>My <span className="gradient-text">Orders</span></h1>
-            <p style={{ color: 'var(--text-muted)' }}>Track all your 3D print orders in one place.</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+              <div>
+                <h1>My <span className="gradient-text">Orders</span></h1>
+                <p style={{ color: 'var(--text-muted)' }}>Track all your 3D print orders in one place.</p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', display: 'inline-block', animation: 'pulse-dot 2s infinite' }} />
+                Live updates
+              </div>
+            </div>
           </div>
 
           {/* Filter tabs */}

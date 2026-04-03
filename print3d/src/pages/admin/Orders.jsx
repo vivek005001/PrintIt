@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { AdminNav } from './Dashboard'
 import api from '../../utils/api'
+import { useAutoRefresh } from '../../hooks/useAutoRefresh'
 
 const STATUS_META = {
   pending: { label: 'Pending', color: 'var(--status-pending)', icon: '⏳' },
@@ -158,9 +159,13 @@ export default function AdminOrders() {
   const [approveModal, setApproveModal] = useState(null)
   const [receiptModal, setReceiptModal] = useState(null)
 
-  useEffect(() => {
+  const fetchOrders = useCallback(() => {
     api.get('/orders').then(r => setOrders(r.data)).finally(() => setLoading(false))
   }, [])
+
+  // Pause refresh while a modal is open (avoid stale data overwrite during action)
+  const modalOpen = !!(approveModal || receiptModal)
+  useAutoRefresh(fetchOrders, 10000, !modalOpen)
 
   const updateOrder = (updated) => {
     setOrders(prev => prev.map(o => o.id === updated.id ? updated : o))
@@ -174,8 +179,16 @@ export default function AdminOrders() {
       <main className="admin-content">
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }}>
           <div className="page-header">
-            <h1>Orders</h1>
-            <p style={{ color: 'var(--text-muted)' }}>{orders.length} total orders</p>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8 }}>
+              <div>
+                <h1>Orders</h1>
+                <p style={{ color: 'var(--text-muted)' }}>{orders.length} total orders</p>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#22c55e', display: 'inline-block', animation: 'pulse-dot 2s infinite' }} />
+                Auto-refreshing
+              </div>
+            </div>
           </div>
 
           {/* Filter tabs */}
