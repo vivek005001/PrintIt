@@ -1,0 +1,59 @@
+# ── Dependencies ────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+
+# ── Environment variables (NEVER commit these) ───────────
+.env
+.env.local
+.env.*.local
+.env.production
+
+# ── Build output ─────────────────────────────────────────
+dist/
+dist-ssr/
+build/
+
+# ── Vite ─────────────────────────────────────────────────
+*.local
+
+# ── SQLite (local DB — not needed in production) ─────────
+server/*.db
+server/*.db-shm
+server/*.db-wal
+
+# ── Local file uploads (now on Supabase Storage) ─────────
+server/uploads/*
+!server/uploads/.gitkeep
+
+# ── OS files ─────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Editor/IDE ───────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# ── Logs ─────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── Runtime ──────────────────────────────────────────────
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# ── Coverage ─────────────────────────────────────────────
+coverage/
+.nyc_output/
