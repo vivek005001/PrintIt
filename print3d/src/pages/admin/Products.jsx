@@ -3,10 +3,50 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { AdminNav } from './Dashboard'
 import api from '../../utils/api'
 
-const CATEGORIES = ['Home & Office', 'Tech', 'Accessories', 'Other']
+const DEFAULT_CATEGORIES = ['Home & Office', 'Tech', 'Accessories', 'Art & Decor', 'Education', 'Other']
 const MATERIALS = ['PLA', 'PETG', 'ABS', 'TPU', 'Resin']
 
-function ProductModal({ product, onClose, onSaved }) {
+// Combobox: free-text input + suggestion chips from existing categories
+function CategoryCombobox({ value, onChange, existingCategories }) {
+  const suggestions = [...new Set([...DEFAULT_CATEGORIES, ...existingCategories])].filter(Boolean)
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <input
+        className="form-input"
+        value={value || ''}
+        onChange={e => onChange(e.target.value)}
+        placeholder="Type or pick a category…"
+        list="cat-suggestions"
+      />
+      <datalist id="cat-suggestions">
+        {suggestions.map(c => <option key={c} value={c} />)}
+      </datalist>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+        {suggestions.map(c => (
+          <button
+            key={c}
+            type="button"
+            onClick={() => onChange(c)}
+            style={{
+              padding: '3px 10px',
+              borderRadius: 20,
+              fontSize: '0.75rem',
+              fontWeight: 600,
+              border: '1.5px solid',
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+              borderColor: value === c ? 'var(--accent-primary)' : 'var(--border)',
+              background: value === c ? 'rgba(192,86,42,0.09)' : 'transparent',
+              color: value === c ? 'var(--accent-primary)' : 'var(--text-muted)',
+            }}
+          >{c}</button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ProductModal({ product, onClose, onSaved, existingCategories }) {
   const [form, setForm] = useState(product || { name: '', description: '', price: '', category: 'Home & Office', material: 'PLA', print_time: '', in_stock: true })
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -64,9 +104,11 @@ function ProductModal({ product, onClose, onSaved }) {
             </div>
             <div className="form-group">
               <label className="form-label">Category</label>
-              <select className="form-input" value={form.category || ''} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
-                {CATEGORIES.map(c => <option key={c}>{c}</option>)}
-              </select>
+              <CategoryCombobox
+                value={form.category || ''}
+                onChange={val => setForm(f => ({ ...f, category: val }))}
+                existingCategories={existingCategories}
+              />
             </div>
             <div className="form-group">
               <label className="form-label">Material</label>
@@ -116,6 +158,8 @@ export default function AdminProducts() {
   useEffect(() => {
     api.get('/products').then(r => setProducts(r.data)).finally(() => setLoading(false))
   }, [])
+
+  const existingCategories = [...new Set(products.map(p => p.category).filter(Boolean))]
 
   const handleSaved = (product, isEdit) => {
     if (isEdit) setProducts(prev => prev.map(p => p.id === product.id ? product : p))
@@ -207,6 +251,7 @@ export default function AdminProducts() {
             product={modal === 'add' ? null : modal}
             onClose={() => setModal(null)}
             onSaved={handleSaved}
+            existingCategories={existingCategories}
           />
         )}
       </AnimatePresence>
